@@ -84,7 +84,7 @@ void InsertElement(T_ptr* &list, T data, int position) {
 
 // Remove at position (if no position specified, at end)
 template <typename T_ptr, typename T>
-T PopArticle(T_ptr* &list, int position = -1) {
+T PopElement(T_ptr* &list, int position = -1) {
 	if (list == NULL) { printf("Cannot read value from NULL list, returning empty article\n"); return *new T; }
 	if (list->next == NULL) { T aux = list->data; delete list; list = NULL; return aux; }
 	T_ptr* tmp = list;
@@ -99,7 +99,7 @@ T PopArticle(T_ptr* &list, int position = -1) {
 
 // Read at position (if no position specified, at end)
 template <typename T_ptr, typename T>
-T ReadArticle(T_ptr* list, int position = -1) {
+T ReadElement(T_ptr* list, int position = -1) {
 	if (list == NULL) { printf("Cannot read value from NULL list, returning empty article\n"); return *new T; }
 	if (list->next == NULL) { return list->data; }
 	while (list->next->next != NULL && position != 1) {
@@ -108,7 +108,7 @@ T ReadArticle(T_ptr* list, int position = -1) {
 };
 
 template <typename T_ptr, typename T>
-void ModifyArticle(T_ptr* list, int position, T data) {
+void ModifyElement(T_ptr* list, int position, T data) {
 	while (list->next != NULL && position > 0) {
 		list = list->next; position--;
 	} list->data = data;
