@@ -15,7 +15,7 @@ struct Client {
 	std::string name;
 };
 
-struct Vendors {
+struct Vendor {
 	int idNumber;
 	int commissionPercentage;
 	std::string name;
@@ -24,7 +24,7 @@ struct Vendors {
 
 struct ArticleNode { Article data; int key; ArticleNode* next = NULL; };
 struct ClientNode { Client data; int key; ClientNode* next = NULL; };
-struct VendorsNode { Vendors data; int key; VendorsNode* next = NULL; };
+struct VendorNode { Vendor data; int key; VendorNode* next = NULL; };
 
 // OTHER FUNCTIONS
 
@@ -150,22 +150,64 @@ Client CreateClient(int idNumber, std::string address, std::string cellphoneNumb
 	return ret;
 };
 
+Vendor CreateVendor(int idNumber, int commissionPercentage, std::string name, std::string ingressDate) {
+	Vendor ret;
+	ret.idNumber = idNumber;
+	ret.commissionPercentage = commissionPercentage;
+	ret.name = name;
+	ret.ingressDate = ingressDate;
+	return ret;
+};
+
 // END ARTICLES
 
 int main() {
-	ClientNode* InitialNode = NULL;
-	PushElement<ClientNode, Client>(InitialNode,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
-	PushElement<ClientNode, Client>(InitialNode,
-		CreateClient(30395024, "My Home", "04143103358", "Cristina Carnevali"));
-	AppendElement<ClientNode, Client>(InitialNode,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
-	AppendElement<ClientNode, Client>(InitialNode,
-		CreateClient(30395024, "My Home", "04143103358", "Cristina Carnevali"));
-	InsertElement<ClientNode, Client>(InitialNode,
-		CreateClient(30395024, "My Home", "04143103358", "Doug"), 1);
+	ArticleNode* ArticleN = NULL;
+	ClientNode* ClientN = NULL;
+	VendorNode* VendorN = NULL;
 
-	PrintElements<ClientNode>(InitialNode);
-	PrintKeys<ClientNode>(InitialNode);
+	PushElement<ArticleNode, Article>(ArticleN,
+		CreateArticle("A123", 100, 2, "Cambur"));
+	PushElement<ClientNode, Client>(ClientN,
+		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
+	PushElement<VendorNode, Vendor>(VendorN,
+		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"));
+	AppendElement<ArticleNode, Article>(ArticleN,
+		CreateArticle("A123", 100, 2, "Cambur"));
+	AppendElement<ClientNode, Client>(ClientN,
+		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
+	AppendElement<VendorNode, Vendor>(VendorN,
+		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"));
+	InsertElement<ArticleNode, Article>(ArticleN,
+		CreateArticle("A123", 100, 2, "Cambur"), 0);
+	InsertElement<ClientNode, Client>(ClientN,
+		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 0);
+	InsertElement<VendorNode, Vendor>(VendorN,
+		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 2);
+	InsertElement<ArticleNode, Article>(ArticleN,
+		CreateArticle("A123", 100, 2, "Cambur"), 2);
+	InsertElement<ClientNode, Client>(ClientN,
+		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 0);
+	InsertElement<VendorNode, Vendor>(VendorN,
+		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 2);
+	InsertElement<ArticleNode, Article>(ArticleN,
+		CreateArticle("A123", 100, 2, "Cambur"), 99);
+	InsertElement<ClientNode, Client>(ClientN,
+		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 99);
+	InsertElement<VendorNode, Vendor>(VendorN,
+		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 99);
+
+	PrintKeys<ArticleNode>(ArticleN);
+	PrintElements<ArticleNode>(ArticleN);
+	printf("\n");
+
+	PrintKeys<ClientNode>(ClientN);
+	PrintElements<ClientNode>(ClientN);
+	printf("\n");
+
+	PrintKeys<VendorNode>(VendorN);
+	PrintElements<VendorNode>(VendorN);
+	printf("\n");
+
 	return 0;
 }
