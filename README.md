@@ -13,11 +13,11 @@
     - [ ] Articulos
     - [ ] Clientes
     - [ ] Vendedores
-- [ ] Agregar a la lista cargada elementos de un archivo
-    - [ ] Articulos
-    - [ ] Clientes
-    - [ ] Vendedores
-- [ ] Reemplazar la lista cargada con elementos de un archivo
-    - [ ] Articulos
-    - [ ] Clientes
-    - [ ] Vendedores
+- [x] Agregar a la lista cargada los elementos de un archivo
+    - [x] Articulos
+    - [x] Clientes
+    - [x] Vendedores
+- [x] Reemplazar la lista cargada con elementos de un archivo
+    - [x] Articulos
+    - [x] Clientes
+    - [x] Vendedores

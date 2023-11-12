@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <cstdlib>
+#include <fstream>
 #include <string>
 
 struct Article {
@@ -68,7 +69,6 @@ void AppendElement(T_ptr* &list, T data) {
 // Add at specified position
 template <typename T_ptr, typename T>
 void InsertElement(T_ptr* &list, T data, int position) {
-	if (position < 0) { printf("Cannot insert article in negative position"); return; }
 	if (list == NULL || position == 0) { PushElement<T_ptr, T>(list, data); return; }
 	T_ptr* tmp = list;
 	while (tmp->next != NULL && position != 1) {
@@ -141,6 +141,21 @@ Article CreateArticle(std::string code, int price, int ammount, std::string name
 	return ret;
 };
 
+ArticleNode* ReadFileArticle(bool append = false, ArticleNode* list = NULL, int position = -1) {
+	ArticleNode* tmp = append ? list : NULL;
+	Article tmp_art;
+	std::string input;
+	std::ifstream f("Informacion/Articulos");
+
+	while (!f.eof()) {
+		getline(f, input); tmp_art.code = input;
+		getline(f, input); tmp_art.price = std::atoi(&input[0]);
+		getline(f, input); tmp_art.ammount = std::atoi(&input[0]);
+		getline(f, input); tmp_art.name = input;
+		if (!f.eof()) { InsertElement<ArticleNode, Article>(tmp, tmp_art, position); if (append) { position++; } }
+	} f.close(); return tmp;
+};
+
 Client CreateClient(int idNumber, std::string address, std::string cellphoneNumber, std::string name) {
 	Client ret;
 	ret.idNumber = idNumber;
@@ -148,6 +163,21 @@ Client CreateClient(int idNumber, std::string address, std::string cellphoneNumb
 	ret.cellphoneNumber = cellphoneNumber;
 	ret.name = name;
 	return ret;
+};
+
+ClientNode* ReadFileClientes(bool append = false, ClientNode* list = NULL, int position = -1) {
+	ClientNode* tmp = append ? list : NULL;
+	Client tmp_cli;
+	std::string input;
+	std::ifstream f("Informacion/Clientes");
+
+	while (!f.eof()) {
+		getline(f, input); tmp_cli.idNumber = std::atoi(&input[0]);
+		getline(f, input); tmp_cli.address = input;
+		getline(f, input); tmp_cli.cellphoneNumber = input;
+		getline(f, input); tmp_cli.name = input;
+		if (!f.eof()) { InsertElement<ClientNode, Client>(tmp, tmp_cli, position); if (append) { position++; } }
+	} f.close(); return tmp;
 };
 
 Vendor CreateVendor(int idNumber, int commissionPercentage, std::string name, std::string ingressDate) {
@@ -159,6 +189,21 @@ Vendor CreateVendor(int idNumber, int commissionPercentage, std::string name, st
 	return ret;
 };
 
+VendorNode* ReadFileVendor(bool append = false, VendorNode* list = NULL, int position = -1) {
+	VendorNode* tmp = append ? list : NULL;
+	Vendor tmp_ven;
+	std::string input;
+	std::ifstream f("Informacion/Vendedores");
+
+	while (!f.eof()) {
+		getline(f, input); tmp_ven.idNumber = std::atoi(&input[0]);
+		getline(f, input); tmp_ven.commissionPercentage = std::atoi(&input[0]);
+		getline(f, input); tmp_ven.name = input;
+		getline(f, input); tmp_ven.ingressDate = input;
+		if (!f.eof()) { InsertElement<VendorNode, Vendor>(tmp, tmp_ven, position); if (append) { position++; } }
+	} f.close(); return tmp;
+};
+
 // END ARTICLES
 
 int main() {
@@ -166,36 +211,10 @@ int main() {
 	ClientNode* ClientN = NULL;
 	VendorNode* VendorN = NULL;
 
-	PushElement<ArticleNode, Article>(ArticleN,
-		CreateArticle("A123", 100, 2, "Cambur"));
-	PushElement<ClientNode, Client>(ClientN,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
-	PushElement<VendorNode, Vendor>(VendorN,
-		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"));
-	AppendElement<ArticleNode, Article>(ArticleN,
-		CreateArticle("A123", 100, 2, "Cambur"));
-	AppendElement<ClientNode, Client>(ClientN,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"));
-	AppendElement<VendorNode, Vendor>(VendorN,
-		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"));
-	InsertElement<ArticleNode, Article>(ArticleN,
-		CreateArticle("A123", 100, 2, "Cambur"), 0);
-	InsertElement<ClientNode, Client>(ClientN,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 0);
-	InsertElement<VendorNode, Vendor>(VendorN,
-		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 2);
-	InsertElement<ArticleNode, Article>(ArticleN,
-		CreateArticle("A123", 100, 2, "Cambur"), 2);
-	InsertElement<ClientNode, Client>(ClientN,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 0);
-	InsertElement<VendorNode, Vendor>(VendorN,
-		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 2);
-	InsertElement<ArticleNode, Article>(ArticleN,
-		CreateArticle("A123", 100, 2, "Cambur"), 99);
-	InsertElement<ClientNode, Client>(ClientN,
-		CreateClient(30142718, "My Home", "04143103358", "Humberto Aleman"), 99);
-	InsertElement<VendorNode, Vendor>(VendorN,
-		CreateVendor(9878643, 20, "Robert Topala", "01/01/1970"), 99);
+	ArticleN = ReadFileArticle();
+	ArticleN = ReadFileArticle(true, ArticleN, 1);
+	ClientN = ReadFileClientes();
+	VendorN = ReadFileVendor();
 
 	PrintKeys<ArticleNode>(ArticleN);
 	PrintElements<ArticleNode>(ArticleN);
