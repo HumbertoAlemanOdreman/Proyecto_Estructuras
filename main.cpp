@@ -2,25 +2,29 @@
 #include <fstream>
 #include <string>
 
+#define ARCHIVO_COLUMNAS 20
+#define CLIENTE_COLUMNAS 20
+#define VENDEDOR_COLUMNAS 20
+
 struct Article {
-	std::string code = "";
-	int price;
+	char code[ARCHIVO_COLUMNAS];
+	char name[ARCHIVO_COLUMNAS];
+	float price;
 	int ammount;
-	std::string name = "";
 };
 	
 struct Client {
 	int idNumber;
-	std::string address;
-	std::string cellphoneNumber;
-	std::string name;
+	char address[CLIENTE_COLUMNAS];
+	char cellphoneNumber[CLIENTE_COLUMNAS];
+	char name[CLIENTE_COLUMNAS];
 };
 
 struct Vendor {
 	int idNumber;
 	int commissionPercentage;
-	std::string name;
-	std::string ingressDate;
+	char name[VENDEDOR_COLUMNAS];
+	char ingressDate[VENDEDOR_COLUMNAS];
 };
 
 struct ArticleNode { Article data; int key; ArticleNode* next = NULL; };
@@ -28,6 +32,8 @@ struct ClientNode { Client data; int key; ClientNode* next = NULL; };
 struct VendorNode { Vendor data; int key; VendorNode* next = NULL; };
 
 // OTHER FUNCTIONS
+
+void CopyContents(char *arr1, char arr2[ARCHIVO_COLUMNAS]) { for(int i = 0; i < ARCHIVO_COLUMNAS; i++) *(arr1 + i*sizeof(char)) = arr2[i]; }
 
 // END OTHER FUNCTIONS
 
@@ -132,12 +138,12 @@ void PrintKeys(T_ptr* list) {
 	} printf("%d -> NULL\n", list->key);
 };
 
-Article CreateArticle(std::string code, int price, int ammount, std::string name) {
+Article CreateArticle(char code[ARCHIVO_COLUMNAS], int price, int ammount, char name[ARCHIVO_COLUMNAS]) {
 	Article ret;
-	ret.code = code;
+	CopyContents(&ret.code[0], code);
 	ret.price = price;
 	ret.ammount = ammount;
-	ret.name = name;
+	CopyContents(&ret.name[0], name);
 	return ret;
 };
 
@@ -148,7 +154,7 @@ ArticleNode* ReadFileArticle(bool append = false, ArticleNode* list = NULL, int 
 	std::ifstream f("Informacion/Articulos");
 
 	while (!f.eof()) {
-		getline(f, input); tmp_art.code = input;
+		getline(f, input); CopyContents(tmp_art.code, input);
 		getline(f, input); tmp_art.price = std::atoi(&input[0]);
 		getline(f, input); tmp_art.ammount = std::atoi(&input[0]);
 		getline(f, input); tmp_art.name = input;
