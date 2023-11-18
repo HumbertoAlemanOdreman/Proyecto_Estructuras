@@ -1,11 +1,23 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MALLOC_ART (struct ArticleNode*)malloc(sizeof(struct ArticleNode))
 #define MALLOC_VEN (struct VendorNode*)malloc(sizeof(struct VendorNode))
 #define MALLOC_CLI (struct ClientNode*)malloc(sizeof(struct ClientNode))
+
+
+#define CLR_BUF while(getchar() != '\n') {}
+#define ENTER_CONTINUAR printf("  Presione ENTER para continuar\n"); CLR_BUF; getchar();
+#define TECLA_VALIDA printf("  ERROR: debe seleccionar una opcion valida\n"); ENTER_CONTINUAR;
+
 #define CLEAR system("clear")
 #define COL_SIZE 20
+
+struct ArticleNode* ArticlesList = NULL;
+struct VendorNode* VendorList = NULL;
+struct ClientNode* ClientList = NULL;
 
 struct Article {
   char code[COL_SIZE];
@@ -48,6 +60,11 @@ struct VendorNode {
 struct ClientNode {
   struct Client client;
   struct ClientNode* next;
+};
+
+char InputChar() {
+  char sel; scanf(" %c%*[^\n]", &sel);
+  return sel;
 };
 
 int GetLastKey(struct ArticleNode* ArticlesList) {
@@ -124,8 +141,8 @@ void PrintItemAsTableArt(struct Article article, char text[]) {
   printf("  ||===============================||\n");
   printf("  ||%31s||\n", &text[0]);
   printf("  ||===============================||\n");
-  printf("  | Codigo   | %20s |\n", &article.code[0]);
-  printf("  | Nombre   | %20s |\n", &article.name[0]);
+  printf("  | Codigo   | %20s |\n", article.code);
+  printf("  | Nombre   | %20s |\n", article.name);
   printf("  | Precio   | %20.2f |\n", article.price);
   printf("  | Cantidad | %20d |\n", article.ammount);
   printf("  ||===============================||\n");
@@ -135,8 +152,8 @@ void PrintItemAsTableVen(struct Vendor vendor, char text[]) {
   printf("  ||===============================||\n");
   printf("  ||%31s||\n", &text[0]);
   printf("  ||===============================||\n");
-  printf("  | Nombre   | %20s |\n", &vendor.name[0]);
-  printf("  | C.I      | %20s |\n", &vendor.ci[0]);
+  printf("  | Nombre   | %20s |\n", vendor.name);
+  printf("  | C.I      | %20s |\n", vendor.ci);
   printf("  | Date     | %12d/%2d/%4d |\n", vendor.date.day, vendor.date.month, vendor.date.year);
   printf("  | Comision | %20d |\n", vendor.commission);
   printf("  ||===============================||\n");
@@ -146,20 +163,15 @@ void PrintItemAsTableCli(struct Client client, char text[]) {
   printf("  ||===============================||\n");
   printf("  ||%31s||\n", &text[0]);
   printf("  ||===============================||\n");
-  printf("  | Nombre   | %20s |\n", &client.name[0]);
-  printf("  | C.I      | %20s |\n", &client.ci[0]);
-  printf("  | Date     | %20s |\n", &client.dir[0]);
-  printf("  | Comision | %20s |\n", &client.cellphone[0]);
+  printf("  | Nombre   | %20s |\n", client.name);
+  printf("  | C.I      | %20s |\n", client.ci);
+  printf("  | Date     | %20s |\n", client.dir);
+  printf("  | Comision | %20s |\n", client.cellphone);
   printf("  ||===============================||\n");
 };
 
 void PrintItemListArt(struct ArticleNode* List) {
   CLEAR;
-  if (List == NULL) {
-    printf("Esta lista no contiene ningun articulo\n");
-    printf("Presione ENTER para continuar"); getchar();
-    return;
-  }
 
   int item = 1;
   char tmp[20];
@@ -172,9 +184,9 @@ void PrintItemListArt(struct ArticleNode* List) {
     PrintItemAsTableArt(List->article, tmp);
     printf("\n");
 
-    if (PreviousItemArt(articulo_inicial, List) != NULL) { printf("[P] Articulo Previo\n"); }
-    if (List->next != NULL) { printf("[S] Articulo Siguiente\n"); }
-    printf("[T] Terminar Visualizacion\n");
+    if (PreviousItemArt(articulo_inicial, List) != NULL) { printf("  [P] Articulo Previo\n"); }
+    if (List->next != NULL) { printf("  [S] Articulo Siguiente\n"); }
+    printf("  [T] Terminar Visualizacion\n");
     switch(getchar()) {
       case 'T':
       case 't':
@@ -197,11 +209,6 @@ void PrintItemListArt(struct ArticleNode* List) {
 
 void PrintItemListVen(struct VendorNode* List) {
   CLEAR;
-  if (List == NULL) {
-    printf("Esta lista no contiene ningun articulo\n");
-    printf("Presione ENTER para continuar"); getchar();
-    return;
-  }
 
   int item = 1;
   char tmp[20];
@@ -214,9 +221,9 @@ void PrintItemListVen(struct VendorNode* List) {
     PrintItemAsTableVen(List->vendor, tmp);
     printf("\n");
 
-    if (PreviousItemVen(initial_vendor, List) != NULL) { printf("[P] Vendedor Previo\n"); }
-    if (List->next != NULL) { printf("[S] Vendedor Siguiente\n"); }
-    printf("[T] Terminar Visualizacion\n");
+    if (PreviousItemVen(initial_vendor, List) != NULL) { printf("  [P] Vendedor Previo\n"); }
+    if (List->next != NULL) { printf("  [S] Vendedor Siguiente\n"); }
+    printf("  [T] Terminar Visualizacion\n");
     switch(getchar()) {
       case 'T':
       case 't':
@@ -239,11 +246,6 @@ void PrintItemListVen(struct VendorNode* List) {
 
 void PrintItemListCli(struct ClientNode* List) {
   CLEAR;
-  if (List == NULL) {
-    printf("Esta lista no contiene ningun articulo\n");
-    printf("Presione ENTER para continuar"); getchar();
-    return;
-  }
 
   int item = 1;
   char tmp[20];
@@ -256,9 +258,9 @@ void PrintItemListCli(struct ClientNode* List) {
     PrintItemAsTableCli(List->client, tmp);
     printf("\n");
 
-    if (PreviousItemCli(initial_client, List) != NULL) { printf("[P] Cliente Previo\n"); }
-    if (List->next != NULL) { printf("[S] Cliente Siguiente\n"); }
-    printf("[T] Terminar Visualizacion\n");
+    if (PreviousItemCli(initial_client, List) != NULL) { printf("  [P] Cliente Previo\n"); }
+    if (List->next != NULL) { printf("  [S] Cliente Siguiente\n"); }
+    printf("  [T] Terminar Visualizacion\n");
     switch(getchar()) {
       case 'T':
       case 't':
@@ -376,16 +378,16 @@ void InsertItemCli(struct ClientNode** List, struct Client client_to_add, int po
   getchar();
 };
 
-void RemoveItemArt(struct ArticleNode** List, int position) {
-  if (*List == NULL) { return; }
-  if ((*List)->next == NULL) { free(*List); *List = NULL; return; }
+int RemoveItemArt(struct ArticleNode** List, int position) {
+  if (*List == NULL) { return 1; }
+  if ((*List)->next == NULL) { free(*List); *List = NULL; return 0; }
   struct ArticleNode* aux = MALLOC_ART;
   struct ArticleNode* aux_2 = MALLOC_ART;
   if (position <= 0) {
     aux = (*List)->next;
     free(*List);
     *List = aux;
-    return;
+    return 0;
   }
   aux = *List;
   while(aux->next != NULL && position-- > 0) { aux = aux->next; }
@@ -393,18 +395,19 @@ void RemoveItemArt(struct ArticleNode** List, int position) {
   aux = PreviousItemArt(*List, aux);
   free(aux->next);
   aux->next = aux_2;
+  return 0;
 };
 
-void RemoveItemVen(struct VendorNode** List, int position) {
-  if (*List == NULL) { return; }
-  if ((*List)->next == NULL) { free(*List); *List = NULL; return; }
+int RemoveItemVen(struct VendorNode** List, int position) {
+  if (*List == NULL) { return 1; }
+  if ((*List)->next == NULL) { free(*List); *List = NULL; return 0; }
   struct VendorNode* aux = MALLOC_VEN;
   struct VendorNode* aux_2 = MALLOC_VEN;
   if (position <= 0) {
     aux = (*List)->next;
     free(*List);
     *List = aux;
-    return;
+    return 0;
   }
   aux = *List;
   while(aux->next != NULL && position-- > 0) { aux = aux->next; }
@@ -412,18 +415,19 @@ void RemoveItemVen(struct VendorNode** List, int position) {
   aux = PreviousItemVen(*List, aux);
   free(aux->next);
   aux->next = aux_2;
+  return 0;
 };
 
-void RemoveItemCli(struct ClientNode** List, int position) {
-  if (*List == NULL) { return; }
-  if ((*List)->next == NULL) { free(*List); *List = NULL; return; }
+int RemoveItemCli(struct ClientNode** List, int position) {
+  if (*List == NULL) { return 1; }
+  if ((*List)->next == NULL) { free(*List); *List = NULL; return 0; }
   struct ClientNode* aux = MALLOC_CLI;
   struct ClientNode* aux_2 = MALLOC_CLI;
   if (position <= 0) {
     aux = (*List)->next;
     free(*List);
     *List = aux;
-    return;
+    return 0;
   }
   aux = *List;
   while(aux->next != NULL && position-- > 0) { aux = aux->next; }
@@ -431,18 +435,46 @@ void RemoveItemCli(struct ClientNode** List, int position) {
   aux = PreviousItemCli(*List, aux);
   free(aux->next);
   aux->next = aux_2;
+  return 0;
+};
+
+struct ArticleNode* GetNodeArt(struct ArticleNode* List, int position) {
+  if (List == NULL) { return NULL; }
+  if ((List)->next == NULL || position <= 0) { return List; }
+  struct ArticleNode* aux = MALLOC_ART;
+  aux = List;
+  while(aux->next != NULL && position-- > 0) { aux = aux->next; }
+  return aux;
+};
+
+struct VendorNode* GetNodeVen(struct VendorNode* List, int position) {
+  struct Date date = {0, 0, 0};
+  if (List == NULL) { return NULL; }
+  if ((List)->next == NULL || position <= 0) { return List; }
+  struct VendorNode* aux = MALLOC_VEN;
+  aux = List;
+  while(aux->next != NULL && position-- > 0) { aux = aux->next; }
+  return aux;
+};
+
+struct ClientNode* GetNodeCli(struct ClientNode* List, int position) {
+  struct Date date = {0, 0, 0};
+  if (List == NULL) { return NULL; }
+  if ((List)->next == NULL || position <= 0) { return List; }
+  struct ClientNode* aux = MALLOC_CLI;
+  aux = List;
+  while(aux->next != NULL && position-- > 0) { aux = aux->next; }
+  return aux;
 };
 
 void ReadFileArt(struct ArticleNode** List, char dir[]) {
   FILE *f;
   f = fopen(dir, "r");
   if (f == NULL) { return; }
-  printf("Leyendo el archivo %s\n\n", &dir[0]);
 
   // Vaciamos la lista
   if (*List != NULL) {
-    printf("La lista actual no se encuentra vacia, vaciandola...\n");
-    while((*List)->next == NULL) {
+    while((*List) != NULL) {
       RemoveItemArt(List, 0);
     }
   }
@@ -456,7 +488,7 @@ void ReadFileArt(struct ArticleNode** List, char dir[]) {
   if (input_code == EOF) {
     printf("El archivo no contiene informacion, cerrando %s\n", &dir[0]);
     fclose(f);
-    getchar();
+    ENTER_CONTINUAR;
     return;
   }
   while (1) {
@@ -465,9 +497,7 @@ void ReadFileArt(struct ArticleNode** List, char dir[]) {
     input_code = fscanf(f, "%f", &article.price);
     input_code = fscanf(f, "%d", &article.ammount);
     if (input_code != EOF) {
-      PrintItemAsTableArt(article, "Articulo leido");
       printf("\n");
-      getchar();
       aux->article = article;
       aux->key = key++;
       aux->next = MALLOC_ART;
@@ -578,8 +608,12 @@ void ReadFileCli(struct ClientNode** List, char dir[]) {
 void SaveFileArt(struct ArticleNode** List, char dir[]) {
   FILE *f;
   f = fopen(dir, "w");
-  if (f == NULL) { return; }
-  printf("Escribiendo en el archivo %s\n\n", &dir[0]);
+  if (f == NULL) {
+    fclose(f);
+    printf("  El archivo no se ha podido crear, no se ha podido guardar\n");
+    ENTER_CONTINUAR;
+    return;
+  }
 
   struct ArticleNode* aux = *List;
 
@@ -630,10 +664,345 @@ void SaveFileCli(struct ClientNode** List, char dir[]) {
   fclose(f);
 };
 
-struct ArticleNode* ArticlesList = NULL;
-struct VendorNode* VendorList = NULL;
-struct ClientNode* ClientList = NULL;
+void PrintMenuArticulos(void) {
+  CLEAR;
+  printf("\n");
+  printf("  ||===============================||\n");
+  printf("  || Menu Articulos                ||\n");
+  printf("  ||===============================||\n");
+  printf("  || [1] Agregar un Articulo       ||\n");
+  printf("  || [2] Remover un Articulo       ||\n");
+  printf("  || [3] Modificar un Articulo     ||\n");
+  printf("  || [4] Guardar en Archivo        ||\n");
+  printf("  || [5] Cargar de un Archivo      ||\n");
+  printf("  || [6] Leer Lista de Articulos   ||\n");
+  printf("  ||                               ||\n");
+  printf("  || [0] Regresar                  ||\n");
+  printf("  ||===============================||\n");
+};
+
+void MenuManejoArticulos() {
+  char sel[2];
+  char buffer[64];
+  int position;
+  struct Article art;
+  while (1) {
+    PrintMenuArticulos();
+    printf("\n");
+    printf("  Seleccion: ");
+    scanf("%1s", sel);
+    switch(sel[0]) {
+      //
+      // CASO AGREGAR ARTICULO
+      //
+      case '1':
+        art.code[0] = '\0';
+        art.name[0] = '\0';
+        art.price = 0;
+        art.ammount = 0;
+
+        while (1) {
+          CLEAR;
+          PrintMenuArticulos();
+          printf("  ||                               ||\n");
+          PrintItemAsTableArt(art, "Articulo Actual");
+          printf("\n");
+          if (art.code[0] == '\0') {
+            printf("  Ingrese el Codigo del articulo: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(art.code, buffer);
+            continue; }
+          if (art.name[0] == '\0') {
+            printf("  Ingrese el Nombre del articulo: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(art.name, buffer);
+            continue; }
+          if (art.price <= 0) {
+            printf("  Ingrese el Precio del articulo: ");
+            CLR_BUF; scanf("%10s", buffer);
+            art.price = atof(buffer);
+            continue; }
+          if (art.ammount <= 0) {
+            printf("  Ingrese la Cantidad de articulos: ");
+            CLR_BUF; scanf("%10s", buffer);
+            art.ammount = atoi(buffer);
+            continue; }
+          break;
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuArticulos();
+          printf("  ||                               ||\n");
+          PrintItemAsTableArt(art, "Articulo a Agregar");
+          printf("\n");
+          printf("  Ingrese la posicion donde agregar el articulo: \n");
+          printf("  [0, a-z, A-Z] Agregar al inicio de la lista\n");
+          printf("  [-1] Agregar al final de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuArticulos();
+        printf("  ||                               ||\n");
+        PrintItemAsTableArt(art, "Articulo Agregado");
+        printf("\n");
+        printf("  Articulo agregado a la lista!\n");
+        ENTER_CONTINUAR;
+        InsertItemArt(&ArticlesList, art, position);
+        break;
+      //
+      // CASO ELIMINAR ARTICULO
+      //
+      case '2':
+        if (ArticlesList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede eliminar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuArticulos();
+          printf("\n");
+          printf("  Ingrese la posicion del articulo a eliminar: \n");
+          printf("  [0, a-z, A-Z] Eliminar el primer articulo de la lista\n");
+          printf("  [-1] Eliminar el ultimo articulo de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        art = GetNodeArt(ArticlesList, position)->article;
+        if (art.name[0]) {
+          CLEAR;
+          PrintMenuArticulos();
+          printf("  ||                               ||\n");
+          PrintItemAsTableArt(art, "Articulo a Eliminar");
+          printf("\n");
+          printf("  Eliminar %s de la lista?\n", art.name);
+          printf("  [S] Eliminar\n");
+          printf("  [N] No Eliminar\n");
+          CLR_BUF; scanf("%1s", buffer);
+        }
+        if (!(buffer[0] == 's' || buffer[0] == 'S')) {
+          printf("  No se ha eliminado ningun elemento\n");
+        } else if (RemoveItemArt(&ArticlesList, position)) {
+          printf("  La lista es NULL, no se ha podido eliminar ningun elemento\n");
+        } else {
+          printf( "  Se ha eliminado %s de la lista\n", art.name);
+        } ENTER_CONTINUAR;
+        break;
+      //
+      // CASO MODIFICAR ARTICULO
+      //
+      case '3':
+        if (ArticlesList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede modificar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        art.code[0] = '\0';
+        art.name[0] = '\0';
+        art.price = 0;
+        art.ammount = 0;
+
+
+        while (ArticlesList != NULL) {
+          position = -2;
+          CLEAR;
+          PrintMenuArticulos();
+          printf("\n");
+          printf("  Ingrese la posicion del articulo a modificar: \n");
+          printf("  [0, a-z, A-Z] Modificar el primer articulo de la lista\n");
+          printf("  [-1] Modificar el ultimo articulo de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        struct ArticleNode* aux = GetNodeArt(ArticlesList, position);
+
+        while (1) {
+          CLEAR;
+          PrintMenuArticulos();
+          printf("  ||                               ||\n");
+          PrintItemAsTableArt(aux->article, "Articulo a Modificar");
+          printf("\n");
+          printf("  [-] No modificar\n");
+          if (art.code[0] == '\0') {
+            printf("  Ingrese el Nuevo Codigo del articulo: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(art.code, buffer);
+            if (buffer[0] == '-') { strcpy(art.code, aux->article.code); }
+            if (art.code[0] != '\0') { strcpy(aux->article.code, art.code); }
+            continue; }
+          if (art.name[0] == '\0') {
+            printf("  Ingrese el Nombre del articulo: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(art.name, buffer);
+            if (buffer[0] == '-') { strcpy(art.name, aux->article.name); }
+            if (art.name[0] != '\0') { strcpy(aux->article.name, art.name); }
+            continue; }
+          if (art.price <= 0) {
+            printf("  Ingrese el Precio del articulo: ");
+            CLR_BUF; scanf("%10s", buffer);
+            art.price = atof(buffer);
+            if (buffer[0] == '-') { art.price = aux->article.price; }
+            if (art.price > 0) { aux->article.price = art.price; }
+            continue; }
+          if (art.ammount <= 0) {
+            printf("  Ingrese la Cantidad de articulos: ");
+            CLR_BUF; scanf("%10s", buffer);
+            art.ammount = atoi(buffer);
+            if (buffer[0] == '-') { art.ammount = aux->article.ammount; }
+            if (art.ammount > 0) { aux->article.ammount = art.ammount; }
+            continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuArticulos();
+        printf("  ||                               ||\n");
+        PrintItemAsTableArt(art, "Articulo Modificado");
+        printf("\n");
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '4':
+        if (ArticlesList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede guardar");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuArticulos();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        SaveFileArt(&ArticlesList, buffer);
+
+        CLEAR;
+        PrintMenuArticulos();
+        printf("\n");
+        printf("  Lista guardada en %s\n", buffer);
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '5':
+        if (ArticlesList != NULL) {
+          printf("\n");
+          printf("  La lista NO es NULL, seguro que quiere continuar?\n");
+          printf("  [S] Continuar\n");
+          printf("  [N] Retornar\n");
+          CLR_BUF; buffer[0] = getchar();
+          if (!(buffer[0] == 's' || buffer[0] == 'S')) { break; }
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuArticulos();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        ReadFileArt(&ArticlesList, buffer);
+
+        CLEAR;
+        PrintMenuArticulos();
+        printf("\n");
+        printf("  Lista cargada de %s.txt\n", buffer);
+        printf("  [S] Leer lista\n");
+        printf("  [N] Continuar\n");
+        CLR_BUF; buffer[0] = getchar();
+        if (buffer[0] == 'S' || buffer[0] == 's') { PrintItemListArt(ArticlesList); }
+        break;
+      case '6':
+        if (ArticlesList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede visualizar");
+          ENTER_CONTINUAR;
+          break;
+        }
+        PrintItemListArt(ArticlesList);
+        break;
+      case '0':
+        return;
+        break;
+      default:
+        TECLA_VALIDA;
+        break;
+    }
+  }
+};
+
+void MainMenu() {
+  char sel[2];
+  while (1) {
+    CLEAR;
+    printf("\n");
+    printf("  ||===============================||\n");
+    printf("  || Menu Principal                ||\n");
+    printf("  ||===============================||\n");
+    printf("  || [1] Manejo Articulos          ||\n");
+    printf("  || [2] Manejo Vendedores         ||\n");
+    printf("  || [3] Manejo Clientes           ||\n");
+    printf("  ||                               ||\n");
+    printf("  || [0] Salir Del Programa        ||\n");
+    printf("  ||===============================||\n\n");
+    printf("  Seleccion: ");
+    scanf("%1s", sel);
+    switch(sel[0]) {
+      case '1':
+        MenuManejoArticulos();
+        break;
+      case '2':
+        break;
+      case '3':
+        break;
+      case '0':
+        return;
+        break;
+      default:
+        TECLA_VALIDA;
+    };
+  }
+};
+
 
 int main(void) {
+  MainMenu();
   return 0;
 }
