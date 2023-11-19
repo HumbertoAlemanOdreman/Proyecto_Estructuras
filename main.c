@@ -67,6 +67,50 @@ char InputChar() {
   return sel;
 };
 
+int IsInRange(int num, int min, int max) { return (num >= min && num <= max); }
+
+int OmmitableInputString(char* str, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  if (buffer[0] == '-') { return 1; }
+  strcpy(str, buffer);
+  return 0;
+};
+
+int OmmitableInputNumber(int* num, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  if (buffer[0] == '-') { return 1; }
+  *num = atoi(buffer);
+  return 0;
+}
+
+int OmmitableInputFloat(float* num, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  if (buffer[0] == '-') { return 1; }
+  *num = atof(buffer);
+  return 0;
+}
+
+void InputString(char* str, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  strcpy(str, buffer);
+};
+
+void InputNumber(int* num, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  *num = atoi(buffer);
+}
+
+void InputFloat(float* num, char* format) {
+  char buffer[128];
+  CLR_BUF; scanf(format, buffer);
+  *num = atof(buffer);
+}
+
 int GetLastKey(struct ArticleNode* ArticlesList) {
   if (ArticlesList == NULL) { return 0; }
   int max = 0;
@@ -143,7 +187,7 @@ void PrintItemAsTableArt(struct Article article, char text[]) {
   printf("  ||===============================||\n");
   printf("  | Codigo   | %20s |\n", article.code);
   printf("  | Nombre   | %20s |\n", article.name);
-  printf("  | Precio   | %20.2f |\n", article.price);
+  printf("  | Precio   | %19.2f$ |\n", article.price);
   printf("  | Cantidad | %20d |\n", article.ammount);
   printf("  ||===============================||\n");
 };
@@ -155,7 +199,7 @@ void PrintItemAsTableVen(struct Vendor vendor, char text[]) {
   printf("  | Nombre   | %20s |\n", vendor.name);
   printf("  | C.I      | %20s |\n", vendor.ci);
   printf("  | Date     | %12d/%2d/%4d |\n", vendor.date.day, vendor.date.month, vendor.date.year);
-  printf("  | Comision | %20d |\n", vendor.commission);
+  printf("  | Comision | %19d%% |\n", vendor.commission);
   printf("  ||===============================||\n");
 };
 
@@ -473,11 +517,7 @@ void ReadFileArt(struct ArticleNode** List, char dir[]) {
   if (f == NULL) { return; }
 
   // Vaciamos la lista
-  if (*List != NULL) {
-    while((*List) != NULL) {
-      RemoveItemArt(List, 0);
-    }
-  }
+  while(*List != NULL) { RemoveItemArt(List, 0); }
 
   int input_code, key = 0;
   struct ArticleNode* aux = MALLOC_ART;
@@ -515,15 +555,9 @@ void ReadFileVen(struct VendorNode** List, char dir[]) {
   FILE *f;
   f = fopen(dir, "r");
   if (f == NULL) { return; }
-  printf("Leyendo el archivo %s\n\n", &dir[0]);
 
   // Vaciamos la lista
-  if (*List != NULL) {
-    printf("La lista actual no se encuentra vacia, vaciandola...\n");
-    while((*List)->next == NULL) {
-      RemoveItemVen(List, 0);
-    }
-  }
+  while(*List != NULL) { RemoveItemVen(List, 0); }
 
   int input_code, key = 0;
   struct VendorNode* aux = MALLOC_VEN;
@@ -543,9 +577,6 @@ void ReadFileVen(struct VendorNode** List, char dir[]) {
     input_code = fscanf(f, "%d/%d/%d", &vendor.date.day, &vendor.date.month, &vendor.date.year);
     input_code = fscanf(f, "%d", &vendor.commission);
     if (input_code != EOF) {
-      PrintItemAsTableVen(vendor, "Vendedor leido");
-      printf("\n");
-      getchar();
       aux->vendor = vendor;
       aux->next = MALLOC_VEN;
       aux = aux->next;
@@ -632,7 +663,6 @@ void SaveFileVen(struct VendorNode** List, char dir[]) {
   FILE *f;
   f = fopen(dir, "w");
   if (f == NULL) { return; }
-  printf("Escribiendo en el archivo %s\n\n", &dir[0]);
 
   struct VendorNode* aux = *List;
 
@@ -681,6 +711,23 @@ void PrintMenuArticulos(void) {
   printf("  ||===============================||\n");
 };
 
+void PrintMenuVendedores(void) {
+  CLEAR;
+  printf("\n");
+  printf("  ||===============================||\n");
+  printf("  || Menu Vendedores               ||\n");
+  printf("  ||===============================||\n");
+  printf("  || [1] Agregar un Vendedor       ||\n");
+  printf("  || [2] Remover un Vendedor       ||\n");
+  printf("  || [3] Modificar un Vendedor     ||\n");
+  printf("  || [4] Guardar en Vendedor       ||\n");
+  printf("  || [5] Cargar de un Vendedor     ||\n");
+  printf("  || [6] Leer Lista de Vendedors   ||\n");
+  printf("  ||                               ||\n");
+  printf("  || [0] Regresar                  ||\n");
+  printf("  ||===============================||\n");
+};
+
 void MenuManejoArticulos() {
   char sel[2];
   char buffer[64];
@@ -709,24 +756,16 @@ void MenuManejoArticulos() {
           printf("\n");
           if (art.code[0] == '\0') {
             printf("  Ingrese el Codigo del articulo: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(art.code, buffer);
-            continue; }
+            InputString(art.code, "%19s"); continue; }
           if (art.name[0] == '\0') {
             printf("  Ingrese el Nombre del articulo: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(art.name, buffer);
-            continue; }
+            InputString(art.name, "%19s"); continue; }
           if (art.price <= 0) {
             printf("  Ingrese el Precio del articulo: ");
-            CLR_BUF; scanf("%10s", buffer);
-            art.price = atof(buffer);
-            continue; }
+            InputFloat(&art.price, "%10s"); continue; }
           if (art.ammount <= 0) {
             printf("  Ingrese la Cantidad de articulos: ");
-            CLR_BUF; scanf("%10s", buffer);
-            art.ammount = atoi(buffer);
-            continue; }
+            InputNumber(&art.ammount, "%10s"); continue; }
           break;
         }
 
@@ -741,10 +780,9 @@ void MenuManejoArticulos() {
           printf("  [0, a-z, A-Z] Agregar al inicio de la lista\n");
           printf("  [-1] Agregar al final de la lista\n");
           printf("  Posicion: ");
-          CLR_BUF; scanf("%10s", buffer);
-          position = atoi(buffer);
-          if (position == -1) { position = INT32_MAX; }
+          InputNumber(&position, "%10s");
           if (position < -1) { continue; }
+          if (position == -1) { position = INT32_MAX; }
           break;
         }
 
@@ -777,10 +815,9 @@ void MenuManejoArticulos() {
           printf("  [0, a-z, A-Z] Eliminar el primer articulo de la lista\n");
           printf("  [-1] Eliminar el ultimo articulo de la lista\n");
           printf("  Posicion: ");
-          CLR_BUF; scanf("%10s", buffer);
-          position = atoi(buffer);
-          if (position == -1) { position = INT32_MAX; }
+          InputNumber(&position, "%10s");
           if (position < -1) { continue; }
+          if (position == -1) { position = INT32_MAX; }
           break;
         }
 
@@ -796,6 +833,7 @@ void MenuManejoArticulos() {
           printf("  [N] No Eliminar\n");
           CLR_BUF; scanf("%1s", buffer);
         }
+
         if (!(buffer[0] == 's' || buffer[0] == 'S')) {
           printf("  No se ha eliminado ningun elemento\n");
         } else if (RemoveItemArt(&ArticlesList, position)) {
@@ -830,10 +868,9 @@ void MenuManejoArticulos() {
           printf("  [0, a-z, A-Z] Modificar el primer articulo de la lista\n");
           printf("  [-1] Modificar el ultimo articulo de la lista\n");
           printf("  Posicion: ");
-          CLR_BUF; scanf("%10s", buffer);
-          position = atoi(buffer);
-          if (position == -1) { position = INT32_MAX; }
+          InputNumber(&position, "%10s");
           if (position < -1) { continue; }
+          if (position == -1) { position = INT32_MAX; }
           break;
         }
 
@@ -848,30 +885,22 @@ void MenuManejoArticulos() {
           printf("  [-] No modificar\n");
           if (art.code[0] == '\0') {
             printf("  Ingrese el Nuevo Codigo del articulo: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(art.code, buffer);
-            if (buffer[0] == '-') { strcpy(art.code, aux->article.code); }
+            if (OmmitableInputString(art.code, "%19s")) { strcpy(art.code, aux->article.code); }
             if (art.code[0] != '\0') { strcpy(aux->article.code, art.code); }
             continue; }
           if (art.name[0] == '\0') {
             printf("  Ingrese el Nombre del articulo: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(art.name, buffer);
-            if (buffer[0] == '-') { strcpy(art.name, aux->article.name); }
+            if (OmmitableInputString(art.name, "%19s")) { strcpy(art.name, aux->article.name); }
             if (art.name[0] != '\0') { strcpy(aux->article.name, art.name); }
             continue; }
           if (art.price <= 0) {
             printf("  Ingrese el Precio del articulo: ");
-            CLR_BUF; scanf("%10s", buffer);
-            art.price = atof(buffer);
-            if (buffer[0] == '-') { art.price = aux->article.price; }
+            if (OmmitableInputFloat(&art.price, "%10s")) { art.price = aux->article.price; }
             if (art.price > 0) { aux->article.price = art.price; }
             continue; }
           if (art.ammount <= 0) {
             printf("  Ingrese la Cantidad de articulos: ");
-            CLR_BUF; scanf("%10s", buffer);
-            art.ammount = atoi(buffer);
-            if (buffer[0] == '-') { art.ammount = aux->article.ammount; }
+            if (OmmitableInputNumber(&art.ammount, "%10s")) { art.ammount = aux->article.ammount; }
             if (art.ammount > 0) { aux->article.ammount = art.ammount; }
             continue; }
           break;
@@ -968,6 +997,312 @@ void MenuManejoArticulos() {
   }
 };
 
+void MenuManejoVendedores() {
+  char sel[2];
+  char buffer[64];
+  int position;
+  struct Vendor ven;
+  while (1) {
+    PrintMenuVendedores();
+    printf("\n");
+    printf("  Seleccion: ");
+    scanf("%1s", sel);
+    switch(sel[0]) {
+      //
+      // CASO AGREGAR ARTICULO
+      //
+      case '1':
+        ven.name[0] = '\0';
+        ven.ci[0] = '\0';
+        ven.date.day = 0;
+        ven.date.month = 0;
+        ven.date.year = 0;
+        ven.commission = 0;
+
+
+        while (1) {
+          CLEAR;
+          PrintMenuVendedores();
+          printf("  ||                               ||\n");
+          PrintItemAsTableVen(ven, "Vendedor Actual");
+          if (ven.name[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            InputString(ven.name, "%19s"); continue; }
+          if (ven.ci[0] == '\0') {
+            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            InputString(ven.ci, "%10s"); continue; }
+          printf("\n");
+          if (ven.date.year <= 0) {
+            printf("  Ingrese el Anio en que el vendedor se unio: ");
+            InputNumber(&ven.date.year, "%4s"); continue; }
+          if (ven.date.month <= 0) {
+            printf("  Ingrese el Mes en que el vendedor se unio: ");
+            InputNumber(&ven.date.month, "%2s"); if (IsInRange(ven.date.month, 1, 12)) { ven.date.month = 0; }
+            continue; }
+          if (ven.date.day <= 0) {
+            printf("  Ingrese el Dia en que el vendedor se unio: ");
+            InputNumber(&ven.date.day, "%2s"); if(IsInRange(ven.date.day, 1, 31)) { ven.date.day = 0; }
+            continue; }
+          if (ven.commission <= 0) {
+            printf("  Ingrese Porcentaje de Comision del vendedor: ");
+            InputNumber(&ven.date.day, "%2s");
+            continue; } 
+          break;
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuVendedores();
+          printf("  ||                               ||\n");
+          PrintItemAsTableVen(ven, "Vendedor a Agregar");
+          printf("\n");
+          printf("  Ingrese la posicion donde agregar el vendedor: \n");
+          printf("  [0, a-z, A-Z] Agregar al inicio de la lista\n");
+          printf("  [-1] Agregar al final de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuVendedores();
+        printf("  ||                               ||\n");
+        PrintItemAsTableVen(ven, "Vendedor Agregado");
+        printf("\n");
+        printf("  Vendedor agregado a la lista!\n");
+        ENTER_CONTINUAR;
+        InsertItemVen(&VendorList, ven, position);
+        break;
+      //
+      // CASO ELIMINAR ARTICULO
+      //
+      case '2':
+        if (VendorList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede eliminar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuVendedores();
+          printf("\n");
+          printf("  Ingrese la posicion del vendedor a eliminar: \n");
+          printf("  [0, a-z, A-Z] Eliminar el primer vendedor de la lista\n");
+          printf("  [-1] Eliminar el ultimo vendedor de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        ven = GetNodeVen(VendorList, position)->vendor;
+        if (ven.name[0]) {
+          CLEAR;
+          PrintMenuVendedores();
+          printf("  ||                               ||\n");
+          PrintItemAsTableVen(ven, "Vendedor a Eliminar");
+          printf("\n");
+          printf("  Eliminar a %s de la lista?\n", ven.name);
+          printf("  [S] Eliminar\n");
+          printf("  [N] No Eliminar\n");
+          CLR_BUF; scanf("%1s", buffer);
+        }
+        if (!(buffer[0] == 's' || buffer[0] == 'S')) {
+          printf("  No se ha eliminado ningun elemento\n");
+        } else if (RemoveItemVen(&VendorList, position)) {
+          printf("  La lista es NULL, no se ha podido eliminar ningun elemento\n");
+        } else {
+          printf( "  Se ha eliminado %s de la lista\n", ven.name);
+        } ENTER_CONTINUAR;
+        break;
+      //
+      // CASO MODIFICAR ARTICULO
+      //
+      case '3':
+        if (VendorList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede modificar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        ven.name[0] = '\0';
+        ven.ci[0] = '\0';
+        ven.date.day = 0;
+        ven.date.month = 0;
+        ven.date.year = 0;
+        ven.commission = 0;
+
+        while (VendorList != NULL) {
+          position = -2;
+          CLEAR;
+          PrintMenuVendedores();
+          printf("\n");
+          printf("  Ingrese la posicion del vendedor a modificar: \n");
+          printf("  [0, a-z, A-Z] Modificar el primer vendedor de la lista\n");
+          printf("  [-1] Modificar el ultimo vendedor de la lista\n");
+          printf("  Posicion: ");
+          CLR_BUF; scanf("%10s", buffer);
+          position = atoi(buffer);
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        struct VendorNode* aux = GetNodeVen(VendorList, position);
+
+        while (1) {
+          CLEAR;
+          PrintMenuVendedores();
+          printf("  ||                               ||\n");
+          PrintItemAsTableVen(aux->vendor, "Vendedor a Modificar");
+          printf("\n");
+          printf("  [-] No modificar\n");
+          if (ven.name[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(ven.name, buffer);
+            if (buffer[0] == '-') { strcpy(ven.name, aux->vendor.name); }
+            if (ven.name[0] != '\0') { strcpy(aux->vendor.name, ven.name); }
+            continue; }
+          if (ven.ci[0] == '\0') {
+            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            CLR_BUF; scanf("%19s", buffer);
+            strcpy(ven.ci, buffer);
+            if (buffer[0] == '-') { strcpy(ven.ci, aux->vendor.ci); }
+            if (ven.ci[0] != '\0') { strcpy(aux->vendor.ci, aux->vendor.ci); }
+            continue; }
+          if (ven.date.year <= 0) {
+            printf("  Ingrese Anio de ingreso del vendedor: ");
+            CLR_BUF; scanf("%10s", buffer);
+            ven.date.year = atof(buffer);
+            if (buffer[0] == '-') { ven.date.year = aux->vendor.date.year; }
+            if (ven.date.year > 0) { aux->vendor.date.year = ven.date.year; }
+            continue; }
+          if (ven.date.month <= 0) {
+            printf("  Ingrese el Mes de ingreso del vendedor: ");
+            CLR_BUF; scanf("%10s", buffer);
+            ven.date.month = atof(buffer);
+            if (buffer[0] == '-') { ven.date.month = aux->vendor.date.month; }
+            if (ven.date.month > 0) { aux->vendor.date.month = ven.date.month; }
+            continue; }
+          if (ven.date.day <= 0) {
+            printf("  Ingrese el Dia de ingreso del vendedor: ");
+            CLR_BUF; scanf("%10s", buffer);
+            ven.date.day = atof(buffer);
+            if (buffer[0] == '-') { ven.date.day = aux->vendor.date.day; }
+            if (ven.date.day > 0) { aux->vendor.date.day = ven.date.day; }
+            continue; }
+          if (ven.commission <= 0) {
+            printf("  Ingrese la Comision del vendedor: ");
+            CLR_BUF; scanf("%10s", buffer);
+            ven.commission = atoi(buffer);
+            if (buffer[0] == '-') { ven.commission = aux->vendor.commission; }
+            if (ven.commission > 0) { aux->vendor.commission = ven.commission; }
+            continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuVendedores();
+        printf("  ||                               ||\n");
+        PrintItemAsTableVen(ven, "Articulo Modificado");
+        printf("\n");
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '4':
+        if (VendorList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede guardar");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuVendedores();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        SaveFileVen(&VendorList, buffer);
+
+        CLEAR;
+        PrintMenuVendedores();
+        printf("\n");
+        printf("  Lista guardada en %s\n", buffer);
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '5':
+        if (VendorList != NULL) {
+          printf("\n");
+          printf("  La lista NO es NULL, seguro que quiere continuar?\n");
+          printf("  [S] Continuar\n");
+          printf("  [N] Retornar\n");
+          CLR_BUF; buffer[0] = getchar();
+          if (!(buffer[0] == 's' || buffer[0] == 'S')) { break; }
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuVendedores();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        ReadFileVen(&VendorList, buffer);
+
+        CLEAR;
+        PrintMenuVendedores();
+        printf("\n");
+        printf("  Lista cargada de %s.txt\n", buffer);
+        printf("  [S] Leer lista\n");
+        printf("  [N] Continuar\n");
+        CLR_BUF; buffer[0] = getchar();
+        if (buffer[0] == 'S' || buffer[0] == 's') { PrintItemListVen(VendorList); }
+        break;
+      case '6':
+        if (VendorList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede visualizar");
+          ENTER_CONTINUAR;
+          break;
+        }
+        PrintItemListVen(VendorList);
+        break;
+      case '0':
+        return;
+        break;
+      default:
+        TECLA_VALIDA;
+        break;
+    }
+  }
+};
+
 void MainMenu() {
   char sel[2];
   while (1) {
@@ -989,6 +1324,7 @@ void MainMenu() {
         MenuManejoArticulos();
         break;
       case '2':
+        MenuManejoVendedores();
         break;
       case '3':
         break;
@@ -1000,6 +1336,7 @@ void MainMenu() {
     };
   }
 };
+
 
 
 int main(void) {
