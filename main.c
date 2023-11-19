@@ -728,6 +728,23 @@ void PrintMenuVendedores(void) {
   printf("  ||===============================||\n");
 };
 
+void PrintMenuClientes(void) {
+  CLEAR;
+  printf("\n");
+  printf("  ||===============================||\n");
+  printf("  || Menu Clientes                 ||\n");
+  printf("  ||===============================||\n");
+  printf("  || [1] Agregar un Cliente        ||\n");
+  printf("  || [2] Remover un Cliente        ||\n");
+  printf("  || [3] Modificar un Cliente      ||\n");
+  printf("  || [4] Guardar en Cliente        ||\n");
+  printf("  || [5] Cargar de un Cliente      ||\n");
+  printf("  || [6] Leer Lista de Clientes    ||\n");
+  printf("  ||                               ||\n");
+  printf("  || [0] Regresar                  ||\n");
+  printf("  ||===============================||\n");
+};
+
 void MenuManejoArticulos() {
   char sel[2];
   char buffer[64];
@@ -1045,7 +1062,7 @@ void MenuManejoVendedores() {
             continue; }
           if (ven.commission <= 0) {
             printf("  Ingrese Porcentaje de Comision del vendedor: ");
-            InputNumber(&ven.date.day, "%2s");
+            InputNumber(&ven.date.day, "%2s"); if(IsInRange(ven.commission, 0, 100)) { ven.commission = 0; }
             continue; } 
           break;
         }
@@ -1097,8 +1114,7 @@ void MenuManejoVendedores() {
           printf("  [0, a-z, A-Z] Eliminar el primer vendedor de la lista\n");
           printf("  [-1] Eliminar el ultimo vendedor de la lista\n");
           printf("  Posicion: ");
-          CLR_BUF; scanf("%10s", buffer);
-          position = atoi(buffer);
+          InputNumber(&position, "%10s");
           if (position == -1) { position = INT32_MAX; }
           if (position < -1) { continue; }
           break;
@@ -1169,45 +1185,33 @@ void MenuManejoVendedores() {
           printf("  [-] No modificar\n");
           if (ven.name[0] == '\0') {
             printf("  Ingrese el Nombre del vendedor: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(ven.name, buffer);
-            if (buffer[0] == '-') { strcpy(ven.name, aux->vendor.name); }
+            if (OmmitableInputString(ven.name, "%19s")) { strcpy(ven.name, aux->vendor.name); }
             if (ven.name[0] != '\0') { strcpy(aux->vendor.name, ven.name); }
             continue; }
           if (ven.ci[0] == '\0') {
             printf("  Ingrese la Cedula de Identidad del vendedor: ");
-            CLR_BUF; scanf("%19s", buffer);
-            strcpy(ven.ci, buffer);
-            if (buffer[0] == '-') { strcpy(ven.ci, aux->vendor.ci); }
+            if (OmmitableInputString(ven.ci, "%19s")) { strcpy(ven.ci, aux->vendor.ci); }
             if (ven.ci[0] != '\0') { strcpy(aux->vendor.ci, aux->vendor.ci); }
             continue; }
           if (ven.date.year <= 0) {
             printf("  Ingrese Anio de ingreso del vendedor: ");
-            CLR_BUF; scanf("%10s", buffer);
-            ven.date.year = atof(buffer);
-            if (buffer[0] == '-') { ven.date.year = aux->vendor.date.year; }
-            if (ven.date.year > 0) { aux->vendor.date.year = ven.date.year; }
+            if (OmmitableInputNumber(&ven.date.year, "%4s")) { ven.date.year = aux->vendor.date.year; }
+            if (IsInRange(ven.date.year, 0, 2100)) { aux->vendor.date.year = ven.date.year; }
             continue; }
           if (ven.date.month <= 0) {
             printf("  Ingrese el Mes de ingreso del vendedor: ");
-            CLR_BUF; scanf("%10s", buffer);
-            ven.date.month = atof(buffer);
-            if (buffer[0] == '-') { ven.date.month = aux->vendor.date.month; }
-            if (ven.date.month > 0) { aux->vendor.date.month = ven.date.month; }
+            if (OmmitableInputNumber(&ven.date.month, "%4s")) { ven.date.month = aux->vendor.date.month; }
+            if (IsInRange(ven.date.month, 1, 12)) { aux->vendor.date.month = ven.date.month; }
             continue; }
           if (ven.date.day <= 0) {
             printf("  Ingrese el Dia de ingreso del vendedor: ");
-            CLR_BUF; scanf("%10s", buffer);
-            ven.date.day = atof(buffer);
-            if (buffer[0] == '-') { ven.date.day = aux->vendor.date.day; }
-            if (ven.date.day > 0) { aux->vendor.date.day = ven.date.day; }
+            if (OmmitableInputNumber(&ven.date.day, "%4s")) { ven.date.day = aux->vendor.date.day; }
+            if (IsInRange(ven.date.day, 1, 31)) { aux->vendor.date.day = ven.date.day; }
             continue; }
           if (ven.commission <= 0) {
             printf("  Ingrese la Comision del vendedor: ");
-            CLR_BUF; scanf("%10s", buffer);
-            ven.commission = atoi(buffer);
-            if (buffer[0] == '-') { ven.commission = aux->vendor.commission; }
-            if (ven.commission > 0) { aux->vendor.commission = ven.commission; }
+            if (OmmitableInputNumber(&ven.commission, "3%s")) { ven.commission = aux->vendor.commission; }
+            if (IsInRange(ven.commission, 0, 100)) { aux->vendor.commission = ven.commission; }
             continue; }
           break;
         }
@@ -1215,7 +1219,7 @@ void MenuManejoVendedores() {
         CLEAR;
         PrintMenuVendedores();
         printf("  ||                               ||\n");
-        PrintItemAsTableVen(ven, "Articulo Modificado");
+        PrintItemAsTableVen(ven, "Vendedor Modificado");
         printf("\n");
         ENTER_CONTINUAR;
         break;
@@ -1303,6 +1307,275 @@ void MenuManejoVendedores() {
   }
 };
 
+void MenuManejoClientes() {
+  char sel[2];
+  char buffer[64];
+  int position;
+  struct Client cli;
+  while (1) {
+    PrintMenuClientes();
+    printf("\n");
+    printf("  Seleccion: ");
+    scanf("%1s", sel);
+    switch(sel[0]) {
+      //
+      // CASO AGREGAR CLIENTE
+      //
+      case '1':
+        cli.name[0] = '\0';
+        cli.ci[0] = '\0';
+        cli.dir[0] = '\0';
+        cli.cellphone[0] = '\0';
+
+        while (1) {
+          CLEAR;
+          PrintMenuClientes();
+          printf("  ||                               ||\n");
+          PrintItemAsTableCli(cli, "Cliente Actual");
+          if (cli.name[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            InputString(cli.name, "%19s"); continue; }
+          if (cli.ci[0] == '\0') {
+            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            InputString(cli.ci, "%10s"); continue; }
+          printf("\n");
+          if (cli.dir[0] == '\0') {
+            printf("  Ingrese la Direction del vendedor: ");
+            InputString(cli.dir, "%19s"); continue; }
+          printf("\n");
+          break;
+          if (cli.cellphone[0] == '\0') {
+            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            InputString(cli.cellphone, "%19s"); continue; }
+          printf("\n");
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuClientes();
+          printf("  ||                               ||\n");
+          PrintItemAsTableCli(cli, "Cliente a Agregar");
+          printf("\n");
+          printf("  Ingrese la posicion donde agregar el cliente: \n");
+          printf("  [0, a-z, A-Z] Agregar al inicio de la lista\n");
+          printf("  [-1] Agregar al final de la lista\n");
+          printf("  Posicion: ");
+          InputNumber(&position, "%19s");
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuClientes();
+        printf("  ||                               ||\n");
+        PrintItemAsTableCli(cli, "Cliente Agregado");
+        printf("\n");
+        printf("  Cliente agregado a la lista!\n");
+        ENTER_CONTINUAR;
+        InsertItemCli(&ClientList, cli, position);
+        break;
+      //
+      // CASO ELIMINAR ARTICULO
+      //
+      case '2':
+        if (ClientList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede eliminar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        while (1) {
+          position = -2;
+          CLEAR;
+          PrintMenuClientes();
+          printf("\n");
+          printf("  Ingrese la posicion del vendedor a eliminar: \n");
+          printf("  [0, a-z, A-Z] Eliminar el primer vendedor de la lista\n");
+          printf("  [-1] Eliminar el ultimo vendedor de la lista\n");
+          printf("  Posicion: ");
+          InputNumber(&position, "%10s");
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        cli = GetNodeCli(ClientList, position)->client;
+        if (cli.name[0]) {
+          CLEAR;
+          PrintMenuClientes();
+          printf("  ||                               ||\n");
+          PrintItemAsTableCli(cli, "Cliente a Eliminar");
+          printf("\n");
+          printf("  Eliminar a %s de la lista?\n", cli.name);
+          printf("  [S] Eliminar\n");
+          printf("  [N] No Eliminar\n");
+          CLR_BUF; scanf("%1s", buffer);
+        }
+        if (!(buffer[0] == 's' || buffer[0] == 'S')) {
+          printf("  No se ha eliminado ningun elemento\n");
+        } else if (RemoveItemCli(&ClientList, position)) {
+          printf("  La lista es NULL, no se ha podido eliminar ningun elemento\n");
+        } else {
+          printf( "  Se ha eliminado %s de la lista\n", cli.name);
+        } ENTER_CONTINUAR;
+        break;
+      //
+      // CASO MODIFICAR ARTICULO
+      //
+      case '3':
+        if (ClientList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede modificar nada");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        cli.name[0] = '\0';
+        cli.ci[0] = '\0';
+        cli.dir[0] = '\0';
+        cli.cellphone[0] = '\0';
+
+        while (ClientList != NULL) {
+          position = -2;
+          CLEAR;
+          PrintMenuClientes();
+          printf("\n");
+          printf("  Ingrese la posicion del cliente a modificar: \n");
+          printf("  [0, a-z, A-Z] Modificar el primer cliente de la lista\n");
+          printf("  [-1] Modificar el ultimo vendedor de la lista\n");
+          printf("  Posicion: ");
+          InputNumber(&position, "%10s");
+          if (position == -1) { position = INT32_MAX; }
+          if (position < -1) { continue; }
+          break;
+        }
+
+        struct ClientNode* aux = GetNodeCli(ClientList, position);
+
+        while (1) {
+          CLEAR;
+          PrintMenuClientes();
+          printf("  ||                               ||\n");
+          PrintItemAsTableCli(aux->client, "Cliente a Modificar");
+          printf("\n");
+          printf("  [-] No modificar\n");
+          if (cli.name[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            if (OmmitableInputString(cli.name, "%19s")) { strcpy(cli.name, aux->client.name); }
+            if (cli.name[0] != '\0') { strcpy(aux->client.name, cli.name); }
+            continue; }
+          if (cli.ci[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            if (OmmitableInputString(cli.ci, "%19s")) { strcpy(cli.ci, aux->client.ci); }
+            if (cli.ci[0] != '\0') { strcpy(aux->client.ci, cli.ci); }
+            continue; }
+          if (cli.dir[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            if (OmmitableInputString(cli.dir, "%19s")) { strcpy(cli.dir, aux->client.dir); }
+            if (cli.dir[0] != '\0') { strcpy(aux->client.dir, cli.dir); }
+            continue; }
+          if (cli.cellphone[0] == '\0') {
+            printf("  Ingrese el Nombre del vendedor: ");
+            if (OmmitableInputString(cli.cellphone, "%19s")) { strcpy(cli.cellphone, aux->client.cellphone); }
+            if (cli.cellphone[0] != '\0') { strcpy(aux->client.cellphone, cli.cellphone); }
+            continue; }
+          break;
+        }
+
+        CLEAR;
+        PrintMenuClientes();
+        printf("  ||                               ||\n");
+        PrintItemAsTableCli(cli, "Cliente Modificado");
+        printf("\n");
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '4':
+        if (ClientList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede guardar");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuClientes();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        SaveFileCli(&ClientList, buffer);
+
+        CLEAR;
+        PrintMenuClientes();
+        printf("\n");
+        printf("  Lista guardada en %s\n", buffer);
+        ENTER_CONTINUAR;
+        break;
+      //
+      // CASO GUARDAR ARTICULO
+      //
+      case '5':
+        if (ClientList != NULL) {
+          printf("\n");
+          printf("  La lista NO es NULL, seguro que quiere continuar?\n");
+          printf("  [S] Continuar\n");
+          printf("  [N] Retornar\n");
+          CLR_BUF; buffer[0] = getchar();
+          if (!(buffer[0] == 's' || buffer[0] == 'S')) { break; }
+        }
+
+        buffer[0] = '\n';
+        while (buffer[0] == '\n') {
+          CLEAR;
+          PrintMenuClientes();
+          printf("\n");
+          printf("  Ingrese el nombre del archivo (Sin txt)\n");
+          printf("  Nombre: ");
+          CLR_BUF; scanf("%58s", buffer);
+        }
+
+        strcat(buffer, ".txt");
+        ReadFileCli(&ClientList, buffer);
+
+        CLEAR;
+        PrintMenuClientes();
+        printf("\n");
+        printf("  Lista cargada de %s.txt\n", buffer);
+        printf("  [S] Leer lista\n");
+        printf("  [N] Continuar\n");
+        CLR_BUF; buffer[0] = getchar();
+        if (buffer[0] == 'S' || buffer[0] == 's') { PrintItemListCli(ClientList); }
+        break;
+      case '6':
+        if (ClientList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede visualizar");
+          ENTER_CONTINUAR;
+          break;
+        }
+        PrintItemListCli(ClientList);
+        break;
+      case '0':
+        return;
+        break;
+      default:
+        TECLA_VALIDA;
+        break;
+    }
+  }
+};
+
 void MainMenu() {
   char sel[2];
   while (1) {
@@ -1327,6 +1600,7 @@ void MainMenu() {
         MenuManejoVendedores();
         break;
       case '3':
+        MenuManejoClientes();
         break;
       case '0':
         return;
@@ -1336,8 +1610,6 @@ void MainMenu() {
     };
   }
 };
-
-
 
 int main(void) {
   MainMenu();
