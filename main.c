@@ -34,14 +34,14 @@ struct Date {
 
 struct Vendor {
   char name[COL_SIZE];
-  char ci[COL_SIZE];
+  char ci[10];
   struct Date date;
   int commission;
 };
 
 struct Client {
   char name[COL_SIZE];
-  char ci[COL_SIZE];
+  char ci[10];
   char dir[COL_SIZE];
   char cellphone[COL_SIZE];
 };
@@ -72,7 +72,7 @@ int IsInRange(int num, int min, int max) { return (num >= min && num <= max); }
 int OmmitableInputString(char* str, char* format) {
   char buffer[128];
   CLR_BUF; scanf(format, buffer);
-  if (buffer[0] == '-') { return 1; }
+  if (buffer[0] == '~') { return 1; }
   strcpy(str, buffer);
   return 0;
 };
@@ -80,7 +80,7 @@ int OmmitableInputString(char* str, char* format) {
 int OmmitableInputNumber(int* num, char* format) {
   char buffer[128];
   CLR_BUF; scanf(format, buffer);
-  if (buffer[0] == '-') { return 1; }
+  if (buffer[0] == '~') { return 1; }
   *num = atoi(buffer);
   return 0;
 }
@@ -88,7 +88,7 @@ int OmmitableInputNumber(int* num, char* format) {
 int OmmitableInputFloat(float* num, char* format) {
   char buffer[128];
   CLR_BUF; scanf(format, buffer);
-  if (buffer[0] == '-') { return 1; }
+  if (buffer[0] == '~') { return 1; }
   *num = atof(buffer);
   return 0;
 }
@@ -210,7 +210,7 @@ void PrintItemAsTableCli(struct Client client, char text[]) {
   printf("  | Nombre   | %20s |\n", client.name);
   printf("  | C.I      | %20s |\n", client.ci);
   printf("  | Date     | %20s |\n", client.dir);
-  printf("  | Comision | %20s |\n", client.cellphone);
+  printf("  | Telefono | %20s |\n", client.cellphone);
   printf("  ||===============================||\n");
 };
 
@@ -722,7 +722,7 @@ void PrintMenuVendedores(void) {
   printf("  || [3] Modificar un Vendedor     ||\n");
   printf("  || [4] Guardar en Vendedor       ||\n");
   printf("  || [5] Cargar de un Vendedor     ||\n");
-  printf("  || [6] Leer Lista de Vendedors   ||\n");
+  printf("  || [6] Leer Lista de Vendedores  ||\n");
   printf("  ||                               ||\n");
   printf("  || [0] Regresar                  ||\n");
   printf("  ||===============================||\n");
@@ -899,7 +899,7 @@ void MenuManejoArticulos() {
           printf("  ||                               ||\n");
           PrintItemAsTableArt(aux->article, "Articulo a Modificar");
           printf("\n");
-          printf("  [-] No modificar\n");
+          printf("  [~] No modificar\n");
           if (art.code[0] == '\0') {
             printf("  Ingrese el Nuevo Codigo del articulo: ");
             if (OmmitableInputString(art.code, "%19s")) { strcpy(art.code, aux->article.code); }
@@ -1026,7 +1026,7 @@ void MenuManejoVendedores() {
     scanf("%1s", sel);
     switch(sel[0]) {
       //
-      // CASO AGREGAR ARTICULO
+      // CASO AGREGAR VENDEDOR
       //
       case '1':
         ven.name[0] = '\0';
@@ -1035,7 +1035,6 @@ void MenuManejoVendedores() {
         ven.date.month = 0;
         ven.date.year = 0;
         ven.commission = 0;
-
 
         while (1) {
           CLEAR;
@@ -1051,18 +1050,19 @@ void MenuManejoVendedores() {
           printf("\n");
           if (ven.date.year <= 0) {
             printf("  Ingrese el Anio en que el vendedor se unio: ");
-            InputNumber(&ven.date.year, "%4s"); continue; }
+            InputNumber(&ven.date.year, "%5s"); if (!IsInRange(ven.date.year, 1, 2100)) { ven.date.year = 0; }
+            continue; }
           if (ven.date.month <= 0) {
             printf("  Ingrese el Mes en que el vendedor se unio: ");
-            InputNumber(&ven.date.month, "%2s"); if (IsInRange(ven.date.month, 1, 12)) { ven.date.month = 0; }
+            InputNumber(&ven.date.month, "%3s"); if (!IsInRange(ven.date.month, 1, 12)) { ven.date.month = 0; }
             continue; }
           if (ven.date.day <= 0) {
             printf("  Ingrese el Dia en que el vendedor se unio: ");
-            InputNumber(&ven.date.day, "%2s"); if(IsInRange(ven.date.day, 1, 31)) { ven.date.day = 0; }
+            InputNumber(&ven.date.day, "%3s"); if(!IsInRange(ven.date.day, 1, 31)) { ven.date.day = 0; }
             continue; }
           if (ven.commission <= 0) {
             printf("  Ingrese Porcentaje de Comision del vendedor: ");
-            InputNumber(&ven.date.day, "%2s"); if(IsInRange(ven.commission, 0, 100)) { ven.commission = 0; }
+            InputNumber(&ven.commission, "%4s"); if(!IsInRange(ven.commission, 0, 100)) { ven.commission = 0; }
             continue; } 
           break;
         }
@@ -1095,7 +1095,7 @@ void MenuManejoVendedores() {
         InsertItemVen(&VendorList, ven, position);
         break;
       //
-      // CASO ELIMINAR ARTICULO
+      // CASO ELIMINAR VENDEDOR
       //
       case '2':
         if (VendorList == NULL) {
@@ -1141,7 +1141,7 @@ void MenuManejoVendedores() {
         } ENTER_CONTINUAR;
         break;
       //
-      // CASO MODIFICAR ARTICULO
+      // CASO MODIFICAR VENDEDOR
       //
       case '3':
         if (VendorList == NULL) {
@@ -1182,7 +1182,7 @@ void MenuManejoVendedores() {
           printf("  ||                               ||\n");
           PrintItemAsTableVen(aux->vendor, "Vendedor a Modificar");
           printf("\n");
-          printf("  [-] No modificar\n");
+          printf("  [~] No modificar\n");
           if (ven.name[0] == '\0') {
             printf("  Ingrese el Nombre del vendedor: ");
             if (OmmitableInputString(ven.name, "%19s")) { strcpy(ven.name, aux->vendor.name); }
@@ -1190,28 +1190,32 @@ void MenuManejoVendedores() {
             continue; }
           if (ven.ci[0] == '\0') {
             printf("  Ingrese la Cedula de Identidad del vendedor: ");
-            if (OmmitableInputString(ven.ci, "%19s")) { strcpy(ven.ci, aux->vendor.ci); }
-            if (ven.ci[0] != '\0') { strcpy(aux->vendor.ci, aux->vendor.ci); }
+            if (OmmitableInputString(ven.ci, "%10s")) { strcpy(ven.ci, aux->vendor.ci); }
+            if (ven.ci[0] != '\0') { strcpy(aux->vendor.ci, ven.ci); }
             continue; }
           if (ven.date.year <= 0) {
             printf("  Ingrese Anio de ingreso del vendedor: ");
-            if (OmmitableInputNumber(&ven.date.year, "%4s")) { ven.date.year = aux->vendor.date.year; }
+            if (OmmitableInputNumber(&ven.date.year, "%5s")) { ven.date.year = aux->vendor.date.year; }
             if (IsInRange(ven.date.year, 0, 2100)) { aux->vendor.date.year = ven.date.year; }
+            else { ven.date.year = 0; }
             continue; }
           if (ven.date.month <= 0) {
             printf("  Ingrese el Mes de ingreso del vendedor: ");
-            if (OmmitableInputNumber(&ven.date.month, "%4s")) { ven.date.month = aux->vendor.date.month; }
+            if (OmmitableInputNumber(&ven.date.month, "%3s")) { ven.date.month = aux->vendor.date.month; }
             if (IsInRange(ven.date.month, 1, 12)) { aux->vendor.date.month = ven.date.month; }
+            else { ven.date.month = 0; }
             continue; }
           if (ven.date.day <= 0) {
             printf("  Ingrese el Dia de ingreso del vendedor: ");
-            if (OmmitableInputNumber(&ven.date.day, "%4s")) { ven.date.day = aux->vendor.date.day; }
+            if (OmmitableInputNumber(&ven.date.day, "%3s")) { ven.date.day = aux->vendor.date.day; }
             if (IsInRange(ven.date.day, 1, 31)) { aux->vendor.date.day = ven.date.day; }
+            else { ven.date.day = 0; }
             continue; }
           if (ven.commission <= 0) {
             printf("  Ingrese la Comision del vendedor: ");
-            if (OmmitableInputNumber(&ven.commission, "3%s")) { ven.commission = aux->vendor.commission; }
+            if (OmmitableInputNumber(&ven.commission, "%4s")) { ven.commission = aux->vendor.commission; }
             if (IsInRange(ven.commission, 0, 100)) { aux->vendor.commission = ven.commission; }
+            else { ven.commission = 0; }
             continue; }
           break;
         }
@@ -1333,21 +1337,21 @@ void MenuManejoClientes() {
           printf("  ||                               ||\n");
           PrintItemAsTableCli(cli, "Cliente Actual");
           if (cli.name[0] == '\0') {
-            printf("  Ingrese el Nombre del vendedor: ");
+            printf("  Ingrese el Nombre del cliente: ");
             InputString(cli.name, "%19s"); continue; }
           if (cli.ci[0] == '\0') {
-            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            printf("  Ingrese la Cedula de Identidad del cliente: ");
             InputString(cli.ci, "%10s"); continue; }
           printf("\n");
           if (cli.dir[0] == '\0') {
-            printf("  Ingrese la Direction del vendedor: ");
+            printf("  Ingrese la Direction del cliente: ");
             InputString(cli.dir, "%19s"); continue; }
           printf("\n");
-          break;
           if (cli.cellphone[0] == '\0') {
-            printf("  Ingrese la Cedula de Identidad del vendedor: ");
+            printf("  Ingrese el Telefono del cliente: ");
             InputString(cli.cellphone, "%19s"); continue; }
           printf("\n");
+          break;
         }
 
         while (1) {
@@ -1392,9 +1396,9 @@ void MenuManejoClientes() {
           CLEAR;
           PrintMenuClientes();
           printf("\n");
-          printf("  Ingrese la posicion del vendedor a eliminar: \n");
-          printf("  [0, a-z, A-Z] Eliminar el primer vendedor de la lista\n");
-          printf("  [-1] Eliminar el ultimo vendedor de la lista\n");
+          printf("  Ingrese la posicion del cliente a eliminar: \n");
+          printf("  [0, a-z, A-Z] Eliminar el primer cliente de la lista\n");
+          printf("  [-1] Eliminar el ultimo cliente de la lista\n");
           printf("  Posicion: ");
           InputNumber(&position, "%10s");
           if (position == -1) { position = INT32_MAX; }
@@ -1445,7 +1449,7 @@ void MenuManejoClientes() {
           printf("\n");
           printf("  Ingrese la posicion del cliente a modificar: \n");
           printf("  [0, a-z, A-Z] Modificar el primer cliente de la lista\n");
-          printf("  [-1] Modificar el ultimo vendedor de la lista\n");
+          printf("  [-1] Modificar el ultimo cliente de la lista\n");
           printf("  Posicion: ");
           InputNumber(&position, "%10s");
           if (position == -1) { position = INT32_MAX; }
@@ -1461,24 +1465,24 @@ void MenuManejoClientes() {
           printf("  ||                               ||\n");
           PrintItemAsTableCli(aux->client, "Cliente a Modificar");
           printf("\n");
-          printf("  [-] No modificar\n");
+          printf("  [~] No modificar\n");
           if (cli.name[0] == '\0') {
-            printf("  Ingrese el Nombre del vendedor: ");
+            printf("  Ingrese el Nombre del cliente: ");
             if (OmmitableInputString(cli.name, "%19s")) { strcpy(cli.name, aux->client.name); }
             if (cli.name[0] != '\0') { strcpy(aux->client.name, cli.name); }
             continue; }
           if (cli.ci[0] == '\0') {
-            printf("  Ingrese el Nombre del vendedor: ");
-            if (OmmitableInputString(cli.ci, "%19s")) { strcpy(cli.ci, aux->client.ci); }
+            printf("  Ingrese la Cedula de Identidad del cliente: ");
+            if (OmmitableInputString(cli.ci, "%10s")) { strcpy(cli.ci, aux->client.ci); }
             if (cli.ci[0] != '\0') { strcpy(aux->client.ci, cli.ci); }
             continue; }
           if (cli.dir[0] == '\0') {
-            printf("  Ingrese el Nombre del vendedor: ");
+            printf("  Ingrese la Direccion del cliente: ");
             if (OmmitableInputString(cli.dir, "%19s")) { strcpy(cli.dir, aux->client.dir); }
             if (cli.dir[0] != '\0') { strcpy(aux->client.dir, cli.dir); }
             continue; }
           if (cli.cellphone[0] == '\0') {
-            printf("  Ingrese el Nombre del vendedor: ");
+            printf("  Ingrese el Telefono del cliente: ");
             if (OmmitableInputString(cli.cellphone, "%19s")) { strcpy(cli.cellphone, aux->client.cellphone); }
             if (cli.cellphone[0] != '\0') { strcpy(aux->client.cellphone, cli.cellphone); }
             continue; }
