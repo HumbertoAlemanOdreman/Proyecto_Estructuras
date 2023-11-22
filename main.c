@@ -814,6 +814,7 @@ void PrintMenuClientes(void) {
   printf("  || [4] Guardar en Cliente        ||\n");
   printf("  || [5] Cargar de un Cliente      ||\n");
   printf("  || [6] Leer Lista de Clientes    ||\n");
+  printf("  || [7] Buscar Clientes en Lista  ||\n");
   printf("  ||                               ||\n");
   printf("  || [0] Regresar                  ||\n");
   printf("  ||===============================||\n");
