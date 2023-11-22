@@ -405,6 +405,15 @@ void AppendItemVen(struct VendorNode** List, struct Vendor vendor_to_add) {
   aux->next->next = NULL;
 };
 
+void AppendItemCli(struct ClientNode** List, struct Client client_to_add) {
+  if (*List == NULL) { CreateListCli(List, client_to_add); return; }
+  struct ClientNode* aux = *List;
+  while (aux->next != NULL) { aux = aux->next; }
+  aux->next = MALLOC_CLI;
+  aux->next->client = client_to_add;
+  aux->next->next = NULL;
+};
+
 void InsertItemVen(struct VendorNode** List, struct Vendor vendor_to_add, int position) {
   if (*List == NULL) { CreateListVen(List, vendor_to_add); return; }
   struct VendorNode* aux = MALLOC_VEN;
@@ -467,6 +476,20 @@ struct VendorNode* LookForVendor(struct VendorNode* List, struct Vendor data, in
                   && data.date.month == aux->vendor.date.month
                   && data.date.year == aux->vendor.date.year) { AppendItemVen(&ret, aux->vendor); } break;
       case 3: if (data.commission == aux->vendor.commission) { AppendItemVen(&ret, aux->vendor); } break;
+    }; aux = aux->next;
+  }; return ret;
+};
+
+struct ClientNode* LookForClient(struct ClientNode* List, struct Client data, int field) {
+  if (List == NULL) { return NULL; }
+  struct ClientNode* aux = List;
+  struct ClientNode* ret = NULL;
+  while (aux != NULL) { 
+    switch(field) {
+      case 0: if (!strcmp(data.name, aux->client.name)) { AppendItemCli(&ret, aux->client); } break;
+      case 1: if (!strcmp(data.ci, aux->client.ci)) { AppendItemCli(&ret, aux->client); } break;
+      case 2: if (!strcmp(data.dir, aux->client.dir)) { AppendItemCli(&ret, aux->client); } break;
+      case 3: if (!strcmp(data.cellphone, aux->client.cellphone)) { AppendItemCli(&ret, aux->client); } break;
     }; aux = aux->next;
   }; return ret;
 };
@@ -1439,7 +1462,7 @@ void MenuManejoVendedores() {
           case '3': printf(" la Comision a buscar: "); InputNumber(&ven.commission, "%4s"); break;
           default:
             CLEAR;
-            PrintMenuArticulos(); 
+            PrintMenuVendedores(); 
             printf("\n  El campo ingresado no existe, vuelvalo a intentar\n");
             ENTER_CONTINUAR;
             return;
@@ -1726,6 +1749,56 @@ void MenuManejoClientes() {
         }
         PrintItemListCli(ClientList);
         break;
+      case '7':
+        if (ClientList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede realizar busquedas");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        CLEAR;
+        PrintMenuClientes();
+        printf("\n");
+
+        printf("  Seleccione el campo por el que va a buscar\n");
+        printf("  [0] Nombre\n");
+        printf("  [1] Cedula\n");
+        printf("  [2] Direccion\n");
+        printf("  [3] Telefono");
+        InputString(sel, "%2s");
+
+        cli.name[0] = '\0';
+        cli.ci[0] = '\0';
+        cli.dir[0] = '\0';
+        cli.cellphone[0] = '\0';
+
+        printf("  Ingrese");
+        switch(sel[0]) {
+          case '0': printf(" el Nombre a buscar: "); InputString(cli.name, "%19s"); break;
+          case '1': printf(" la Cedula de Identidad a buscar: "); InputString(cli.ci, "%10s"); break;
+          case '2': printf(" la Direccion a buscar: "); InputString(cli.dir, "%19s"); break;
+          case '3': printf(" el Numero de Telefono a buscar: "); InputString(cli.cellphone, "%19s"); break;
+          default:
+            CLEAR;
+            PrintMenuClientes(); 
+            printf("\n  El campo ingresado no existe, vuelvalo a intentar\n");
+            ENTER_CONTINUAR;
+            return;
+            break;
+        };
+        aux = NULL;
+        aux = LookForClient(ClientList, cli, sel[0] - '0');
+
+        if (aux == NULL) {
+          printf("  No se encontro ningun elemento con esa informacion\n");
+          ENTER_CONTINUAR;
+          break;
+        }
+        printf("  Cliente(s) entontrado(s)\n");
+        ENTER_CONTINUAR;
+        PrintItemListCli(aux);
+      break;
       case '0':
         return;
         break;
