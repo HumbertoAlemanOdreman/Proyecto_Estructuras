@@ -26,6 +26,7 @@ struct Article {
   int ammount;
 };
 
+
 struct Date {
   int day;
   int month;
@@ -61,6 +62,7 @@ struct ClientNode {
   struct Client client;
   struct ClientNode* next;
 };
+
 
 char InputChar() {
   char sel; scanf(" %c%*[^\n]", &sel);
@@ -381,7 +383,26 @@ void InsertItemArt(struct ArticleNode** List, struct Article article_to_add, int
   aux->next->article = article_to_add;
   aux->next->key = key;
   aux->next->next = aux_2;
-  getchar();
+};
+
+void AppendItemArt(struct ArticleNode** List, struct Article article_to_add) {
+  if (*List == NULL) { CreateListArt(List, article_to_add); return; }
+  struct ArticleNode* aux = *List;
+  int key = GetLastKey(*List);
+  while (aux->next != NULL) { aux = aux->next; }
+  aux->next = MALLOC_ART;
+  aux->next->article = article_to_add;
+  aux->next->key = key;
+  aux->next->next = NULL;
+};
+
+void AppendItemVen(struct VendorNode** List, struct Vendor vendor_to_add) {
+  if (*List == NULL) { CreateListVen(List, vendor_to_add); return; }
+  struct VendorNode* aux = *List;
+  while (aux->next != NULL) { aux = aux->next; }
+  aux->next = MALLOC_VEN;
+  aux->next->vendor = vendor_to_add;
+  aux->next->next = NULL;
 };
 
 void InsertItemVen(struct VendorNode** List, struct Vendor vendor_to_add, int position) {
@@ -400,7 +421,6 @@ void InsertItemVen(struct VendorNode** List, struct Vendor vendor_to_add, int po
   aux->next = MALLOC_VEN;
   aux->next->vendor = vendor_to_add;
   aux->next->next = aux_2;
-  getchar();
 };
 
 void InsertItemCli(struct ClientNode** List, struct Client client_to_add, int position) {
@@ -419,7 +439,36 @@ void InsertItemCli(struct ClientNode** List, struct Client client_to_add, int po
   aux->next = MALLOC_CLI;
   aux->next->client = client_to_add;
   aux->next->next = aux_2;
-  getchar();
+};
+
+struct ArticleNode* LookForArticle(struct ArticleNode* List, struct Article data, int field) {
+  if (List == NULL) { return NULL; }
+  struct ArticleNode* aux = List;
+  struct ArticleNode* ret = NULL;
+  while (aux != NULL) { 
+    switch(field) {
+      case 0: if (!strcmp(data.code, aux->article.code)) { AppendItemArt(&ret, aux->article); } break;
+      case 1: if (!strcmp(data.name, aux->article.name)) { AppendItemArt(&ret, aux->article); } break;
+      case 2: if (data.price == aux->article.price)     { AppendItemArt(&ret, aux->article); } break;
+      case 3: if (data.ammount == aux->article.ammount) { AppendItemArt(&ret, aux->article); } break;
+    }; aux = aux->next;
+  }; return ret;
+};
+
+struct VendorNode* LookForVendor(struct VendorNode* List, struct Vendor data, int field) {
+  if (List == NULL) { return NULL; }
+  struct VendorNode* aux = List;
+  struct VendorNode* ret = NULL;
+  while (aux != NULL) { 
+    switch(field) {
+      case 0: if (!strcmp(data.name, aux->vendor.name)) { AppendItemVen(&ret, aux->vendor); } break;
+      case 1: if (!strcmp(data.ci, aux->vendor.ci)) { AppendItemVen(&ret, aux->vendor); } break;
+      case 2: if (data.date.day == aux->vendor.date.day
+                  && data.date.month == aux->vendor.date.month
+                  && data.date.year == aux->vendor.date.year) { AppendItemVen(&ret, aux->vendor); } break;
+      case 3: if (data.commission == aux->vendor.commission) { AppendItemVen(&ret, aux->vendor); } break;
+    }; aux = aux->next;
+  }; return ret;
 };
 
 int RemoveItemArt(struct ArticleNode** List, int position) {
@@ -706,6 +755,7 @@ void PrintMenuArticulos(void) {
   printf("  || [4] Guardar en Archivo        ||\n");
   printf("  || [5] Cargar de un Archivo      ||\n");
   printf("  || [6] Leer Lista de Articulos   ||\n");
+  printf("  || [7] Buscar Articulo en Lista  ||\n");
   printf("  ||                               ||\n");
   printf("  || [0] Regresar                  ||\n");
   printf("  ||===============================||\n");
@@ -723,6 +773,7 @@ void PrintMenuVendedores(void) {
   printf("  || [4] Guardar en Vendedor       ||\n");
   printf("  || [5] Cargar de un Vendedor     ||\n");
   printf("  || [6] Leer Lista de Vendedores  ||\n");
+  printf("  || [7] Buscar Vendedor en Lista  ||\n");
   printf("  ||                               ||\n");
   printf("  || [0] Regresar                  ||\n");
   printf("  ||===============================||\n");
@@ -750,6 +801,7 @@ void MenuManejoArticulos() {
   char buffer[64];
   int position;
   struct Article art;
+  struct ArticleNode* aux = GetNodeArt(ArticlesList, position);
   while (1) {
     PrintMenuArticulos();
     printf("\n");
@@ -891,8 +943,6 @@ void MenuManejoArticulos() {
           break;
         }
 
-        struct ArticleNode* aux = GetNodeArt(ArticlesList, position);
-
         while (1) {
           CLEAR;
           PrintMenuArticulos();
@@ -1004,6 +1054,56 @@ void MenuManejoArticulos() {
         }
         PrintItemListArt(ArticlesList);
         break;
+      case '7':
+        if (ArticlesList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede realizar busquedas");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        CLEAR;
+        PrintMenuArticulos();
+        printf("\n");
+
+        printf("  Seleccione el campo por el que va a buscar\n");
+        printf("  [0] Codigo\n");
+        printf("  [1] Nombre\n");
+        printf("  [2] Precio\n");
+        printf("  [3] Cantidad\n");
+        InputString(sel, "%2s");
+
+        art.code[0] = '\0';
+        art.name[0] = '\0';
+        art.price = 0;
+        art.ammount = 0;
+
+        printf("  Ingrese");
+        switch(sel[0]) {
+          case '0': printf(" el Codigo a buscar: "); InputString(art.code, "%19s"); break;
+          case '1': printf(" el Nombre a buscar: "); InputString(art.name, "%19s"); break;
+          case '2': printf(" el Precio a buscar: "); InputFloat(&art.price, "%19s"); break;
+          case '3': printf(" la Cantidad a buscar: "); InputNumber(&art.ammount, "%19s"); break;
+          default:
+            CLEAR;
+            PrintMenuArticulos(); 
+            printf("\n  El campo ingresado no existe, vuelvalo a intentar\n");
+            ENTER_CONTINUAR;
+            return;
+            break;
+        };
+        aux = NULL;
+        aux = LookForArticle(ArticlesList, art, sel[0] - '0');
+
+        if (aux == NULL) {
+          printf("  No se encontro ningun elemento con esa informacion\n");
+          ENTER_CONTINUAR;
+          break;
+        }
+        printf("  Articulo(s) entontrados\n");
+        ENTER_CONTINUAR;
+        PrintItemListArt(aux);
+      break;
       case '0':
         return;
         break;
@@ -1301,6 +1401,62 @@ void MenuManejoVendedores() {
         }
         PrintItemListVen(VendorList);
         break;
+      case '7':
+        if (VendorList == NULL) {
+          printf("\n");
+          printf("  La lista es NULL, no se puede realizar busquedas");
+          ENTER_CONTINUAR;
+          break;
+        }
+
+        CLEAR;
+        PrintMenuVendedores();
+        printf("\n");
+
+        printf("  Seleccione el campo por el que va a buscar\n");
+        printf("  [0] Nombre\n");
+        printf("  [1] Cedula\n");
+        printf("  [2] Fecha de Ingreso\n");
+        printf("  [3] Comision\n");
+        InputString(sel, "%2s");
+
+        ven.name[0] = '\0';
+        ven.ci[0] = '\0';
+        ven.date.day = 0;
+        ven.date.month = 0;
+        ven.date.year = 0;
+        ven.commission = 0;
+
+        printf("  Ingrese");
+        switch(sel[0]) {
+          case '0': printf(" el Nombre a buscar: "); InputString(ven.name, "%19s"); break;
+          case '1': printf(" la Cedula de Identidad a buscar: "); InputString(ven.ci, "%10s"); break;
+          case '2':
+            printf(" el Anio a buscar: "); InputNumber(&ven.date.year, "%3s");
+            printf("  Ingrese el Mes a buscar: "); InputNumber(&ven.date.month, "%3s");
+            printf("  Ingrese el Dia a buscar: "); InputNumber(&ven.date.day, "%5s");
+            break;
+          case '3': printf(" la Comision a buscar: "); InputNumber(&ven.commission, "%4s"); break;
+          default:
+            CLEAR;
+            PrintMenuArticulos(); 
+            printf("\n  El campo ingresado no existe, vuelvalo a intentar\n");
+            ENTER_CONTINUAR;
+            return;
+            break;
+        };
+        aux = NULL;
+        aux = LookForVendor(VendorList, ven, sel[0] - '0');
+
+        if (aux == NULL) {
+          printf("  No se encontro ningun elemento con esa informacion\n");
+          ENTER_CONTINUAR;
+          break;
+        }
+        printf("  Vendedore(s) entontrado(s)\n");
+        ENTER_CONTINUAR;
+        PrintItemListVen(aux);
+      break;
       case '0':
         return;
         break;
