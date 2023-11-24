@@ -19,7 +19,7 @@
   printf("  ERROR: debe seleccionar una opcion valida\n"); \
   ENTER_CONTINUAR;
 
-#define CLEAR system("clear")
+#define CLEAR if(system("cls")) { system("clear"); }
 #define COL_SIZE 20
 
 struct ArticleNode *ArticlesList = NULL;
@@ -2378,6 +2378,7 @@ int main(void)
   ReadFileArt(&ArticlesList, "Articulos.txt");
   ReadFileVen(&VendorList, "Vendedores.txt");
   ReadFileCli(&ClientList, "Clientes.txt");
+
   MainMenu();
   return 0;
 };
