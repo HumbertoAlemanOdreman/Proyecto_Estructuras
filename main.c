@@ -1,7 +1,8 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 #define MALLOC_ART (struct ArticleNode *)malloc(sizeof(struct ArticleNode))
 #define MALLOC_VEN (struct VendorNode *)malloc(sizeof(struct VendorNode))
