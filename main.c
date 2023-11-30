@@ -1001,7 +1001,7 @@ void ReadFileVen(struct VendorNode **List, char dir[])
   struct VendorNode *ret = aux;
   struct Vendor vendor;
 
-  input_code = fscanf(f, "");
+  input_code = fscanf(f, "%*[^\n]\n");
   if (input_code == EOF)
   {
     fclose(f);
@@ -1048,7 +1048,7 @@ void ReadFileCli(struct ClientNode **List, char dir[])
   struct ClientNode *ret = aux;
   struct Client client;
 
-  input_code = fscanf(f, "");
+  input_code = fscanf(f, "%*[^\n]\n");
   if (input_code == EOF)
   {
     fclose(f);
