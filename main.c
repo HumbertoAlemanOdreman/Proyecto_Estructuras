@@ -1555,6 +1555,7 @@ void MenuManejoVendedores()
   char buffer[64];
   int position;
   struct Vendor ven;
+  struct VendorNode *aux = GetNodeVen(VendorList, position);
   while (1)
   {
     PrintMenuVendedores();
@@ -1778,7 +1779,6 @@ void MenuManejoVendedores()
         break;
       }
 
-      struct VendorNode *aux = GetNodeVen(VendorList, position);
 
       while (1)
       {
@@ -1989,6 +1989,7 @@ void MenuManejoClientes()
   char buffer[64];
   int position;
   struct Client cli;
+  struct ClientNode *aux = GetNodeCli(ClientList, position);
   while (1)
   {
     PrintMenuClientes();
@@ -2178,7 +2179,6 @@ void MenuManejoClientes()
         break;
       }
 
-      struct ClientNode *aux = GetNodeCli(ClientList, position);
 
       while (1)
       {
