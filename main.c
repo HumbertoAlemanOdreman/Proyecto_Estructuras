@@ -472,6 +472,7 @@ void CreateListArt(struct ArticleNode **List, struct Article article_to_add)
     PrintItemAsTableArt(article_to_add, "Creando lista con articulo: ");
     *List = MALLOC_ART;
     (*List)->article = article_to_add;
+    (*List)->next = NULL;
     (*List)->key = 0;
     return;
   }
@@ -487,6 +488,7 @@ void CreateListVen(struct VendorNode **List, struct Vendor vendor_to_add)
     PrintItemAsTableVen(vendor_to_add, "Creando lista con articulo: ");
     *List = MALLOC_VEN;
     (*List)->vendor = vendor_to_add;
+    (*List)->next = NULL;
     return;
   }
   printf("La lista ya existe, conteniendo los siguientes articulos: \n");
@@ -501,6 +503,7 @@ void CreateListCli(struct ClientNode **List, struct Client client_to_add)
     PrintItemAsTableCli(client_to_add, "Creando lista con articulo: ");
     *List = MALLOC_CLI;
     (*List)->client = client_to_add;
+    (*List)->next = NULL;
     return;
   }
   printf("La lista ya existe, conteniendo los siguientes articulos: \n");
